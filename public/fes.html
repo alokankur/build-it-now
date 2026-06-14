@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Indian FES Assessment</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{--navy:#0f2a44;--blue:#1d4ed8;--green:#047857;--red:#b91c1c;--amber:#b45309;--bg:#f5f7fb;--card:#fff;--muted:#667085;--line:#d9e2ec;--text:#111827;--soft:#eef4ff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+    header{background:linear-gradient(135deg,#0f2a44,#1e3a8a);color:#fff;padding:20px 22px}
+    header .wrap{max-width:1200px;margin:auto}
+    h1{margin:0;font-size:24px}
+    header p{margin:5px 0 0;color:#dbeafe;font-size:13px}
+    nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .navwrap{max-width:1200px;margin:auto;display:flex;overflow-x:auto;padding:0 12px}
+    .tab{border:0;background:transparent;padding:13px 15px;font-weight:700;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;font-size:13px}
+    .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+    main{max-width:1200px;margin:auto;padding:18px 14px 60px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+    .card h2,.card h3{margin-top:0}
+    .sub{color:var(--muted);font-size:13px}
+    .note{padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:10px}
+    .note-warn{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12}
+    .note-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
+    .note-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+    .btn{border:0;border-radius:8px;padding:9px 15px;font-weight:700;cursor:pointer;font-size:13px}
+    .btn-primary{background:var(--blue);color:#fff}
+    .btn-secondary{background:#fff;color:#374151;border:1px solid var(--line)}
+    .btn-danger{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .btn-success{background:#047857;color:#fff}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .row-sb{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+    .progress{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:8px 0}
+    .bar{height:100%;background:linear-gradient(90deg,#1d4ed8,#047857);transition:.3s}
+    input,select,textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-family:inherit}
+    input:focus,select:focus{outline:2px solid #93c5fd;outline-offset:1px}
+    .fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+    .fg label{font-size:12px;font-weight:700;color:#374151}
+    .fg input,.fg select,.fg textarea{width:100%}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:640px){.two-col{grid-template-columns:1fr}}
+    .qblock{background:#fff;border-left:4px solid var(--blue);padding:10px 14px;border-radius:8px;margin:14px 0 8px;font-weight:700}
+    .qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    @media(max-width:860px){.qgrid{grid-template-columns:1fr}}
+    .q{border:1px solid var(--line);border-radius:9px;padding:11px;background:#fff}
+    .q.done{border-color:#34d399;background:#f0fdf4}
+    .q.miss{border-color:#f87171;background:#fef2f2}
+    .qtop{display:flex;justify-content:space-between;margin-bottom:7px}
+    .qn{background:#eef4ff;color:#1e40af;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:800}
+    .qs{background:#f1f5f9;color:#475569;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700}
+    .qt{font-size:13px;color:#1f2937;line-height:1.5;margin-bottom:9px}
+    .opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .opt{border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:600;text-align:left;line-height:1.3}
+    .opt:hover{border-color:#60a5fa;background:#eff6ff}
+    .opt.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--line);padding:9px 11px;font-size:13px;text-align:left}
+    th{background:#f8fafc;font-size:12px;font-weight:700;color:#374151}
+    .sc{font-size:24px;font-weight:900;color:var(--blue)}
+    .lbadge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+    .lb-low{background:#fee2e2;color:#991b1b}
+    .lb-avg{background:#dcfce7;color:#166534}
+    .lb-high{background:#ede9fe;color:#7c3aed}
+    .lb-null{background:#f1f5f9;color:#64748b}
+    @media print{nav,.noprint{display:none!important}body{background:#fff}}
+  </style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Indian Manual Matrix-Based FES Assessment</h1>
+  <p>Stencil scoring &middot; Raw scores &middot; STEN norms (Table 4 &amp; Table 5) &middot; Validity Index (VI)</p>
+</div></header>
+<nav><div class="navwrap">
+  <button class="tab active" data-tab="resp">Respondent</button>
+  <button class="tab" data-tab="assess">Assessment</button>
+  <button class="tab" data-tab="results">Results</button>
+  <button class="tab" data-tab="matrix">Matrix &amp; Keys</button>
+  <button class="tab" data-tab="vi">VI Engine</button>
+  <button class="tab" data-tab="norms">STEN Norms</button>
+</div></nav>
+<main>
+  <section id="resp"    class="panel"></section>
+  <section id="assess"  class="panel" hidden></section>
+  <section id="results" class="panel" hidden></section>
+  <section id="matrix"  class="panel" hidden></section>
+  <section id="vi"      class="panel" hidden></section>
+  <section id="norms"   class="panel" hidden></section>
+</main>
+<script>
+// ============================================================
+// SUBSCALE NAMES
+// ============================================================
+var SUBS = {Cf:'Cohesion',Co:'Conflict',Ex:'Expressiveness',In:'Independence',Mo:'Moral-Religious Emphasis',Or:'Organisation',Ro:'Control'};
+
+// ============================================================
+// 98 QUESTIONS — exact text from Indian FES Manual
+// ============================================================
+var Q = {
+  1:{t:"In my family we feel it is important to be the best at whatever you do.",a:"True",b:"False"},
+  2:{t:"Getting ahead in life is very important in our family.",a:"Yes",b:"No"},
+  3:{t:"My family members rarely ever become angry in front of others.",a:"True, they don't",b:"False, they do"},
+  4:{t:"In my family we really help and support one another in everything we do.",a:"Yes, we do",b:"No, we don't"},
+  5:{t:"In my family everyone has an equal say in family decisions.",a:"Yes",b:"No"},
+  6:{t:"My family members often keep their feelings to themselves.",a:"Yes",b:"No"},
+  7:{t:"We don't do things on our own in our family.",a:"True, we don't",b:"False, we do"},
+  8:{t:"In our family, we are strongly encouraged to be independent.",a:"Yes",b:"No"},
+  9:{t:"My family members visit religious places often.",a:"Yes, often",b:"No, rarely"},
+  10:{t:"We don't say prayers regularly in our family.",a:"Yes, we don't",b:"No, we do"},
+  11:{t:"There is a strong emphasis on following rules in our family.",a:"Yes",b:"No, not really"},
+  12:{t:"Activities in our family are pretty carefully planned.",a:"Yes",b:"No"},
+  13:{t:"At home our main form of entertainment is watching T.V. or listening to the radio.",a:"Yes",b:"No"},
+  14:{t:"My family members spend most of the weekends and evenings at home.",a:"Yes",b:"No"},
+  15:{t:"How much money a person makes is not very important in our family.",a:"True, it's not",b:"False, it is"},
+  16:{t:"My family believes in competition and may the best man win.",a:"Yes, always",b:"No, never"},
+  17:{t:"Someone usually gets upset if you complain in our family.",a:"Yes",b:"No"},
+  18:{t:"There is a strong feeling of togetherness in our family.",a:"Yes",b:"No"},
+  19:{t:"At home we are free to say anything we want to.",a:"Yes, we are free",b:"No, we are not"},
+  20:{t:"Feelings of disagreement or disapproval can be frankly expressed in our family.",a:"Yes",b:"No"},
+  21:{t:"We usually think things out for ourselves in our family.",a:"Yes",b:"No"},
+  22:{t:"We can come and go as we want to in our family.",a:"True",b:"False"},
+  23:{t:"We often have talk about the religion in our family.",a:"Yes, often",b:"No, rarely"},
+  24:{t:"In our family we don't believe in heaven or hell.",a:"Yes, we don't",b:"No, we do"},
+  25:{t:"We are generally very neat and orderly.",a:"Yes",b:"No"},
+  26:{t:"It's often hard to find things when you need them in our household.",a:"Yes, very hard",b:"No, it's not"},
+  27:{t:"We often go to movies, sports events, camping etc.",a:"Yes, often",b:"No, rarely"},
+  28:{t:"Friends often come over for dinner or to visit our home.",a:"Yes, often",b:"No, rarely"},
+  29:{t:"My family members always strive to do things just a little better the next time.",a:"True",b:"False"},
+  30:{t:"Members of my family rarely worry about job promotions, school grades, etc.",a:"True, they don't",b:"False, they do"},
+  31:{t:"There is plenty of time and attention for everyone in our family.",a:"Yes",b:"No"},
+  32:{t:"There is hardly any group spirit in our family.",a:"Yes, hardly",b:"No, a lot"},
+  33:{t:"We tell each other about our personal problems without any hesitation.",a:"Yes",b:"No"},
+  34:{t:"Money, paying bills and other important matters are openly talked about in our family.",a:"Yes",b:"No"},
+  35:{t:"There is little or no privacy in our family.",a:"True",b:"False"},
+  36:{t:"My family members almost always rely on themselves when a problem comes up.",a:"Yes, always",b:"No, never"},
+  37:{t:"My family members have strict ideas about what is right and wrong.",a:"Yes",b:"No"},
+  38:{t:"In our family we believe there are some things you just have to take on faith.",a:"True",b:"False"},
+  39:{t:"Being on time is very important in our family.",a:"Yes",b:"No"},
+  40:{t:"Each individual's duties are clearly defined in our family.",a:"Yes",b:"No"},
+  41:{t:"Everyone in our family has a hobby or two.",a:"True",b:"False"},
+  42:{t:"We often seem to be killing time at home.",a:"Yes, often",b:"No, rarely"},
+  43:{t:"In our family, we generally don't try very hard to succeed.",a:"True, we don't",b:"False, we do"},
+  44:{t:"Work before play is the rule in our family.",a:"Yes",b:"No"},
+  45:{t:"We really get along well with each other in our family.",a:"Yes, we do",b:"No, we don't"},
+  46:{t:"We fight a lot in our family.",a:"Yes",b:"No"},
+  47:{t:"At home we are usually very careful about what we say to each other.",a:"Yes",b:"No"},
+  48:{t:"There are lot of spontaneous discussions in our family.",a:"Yes",b:"No"},
+  49:{t:"Members of my family strongly encourage each other to stand up for their rights.",a:"True",b:"False"},
+  50:{t:"We are not really encouraged to speak up for ourselves in our family.",a:"Yes, we are not",b:"No, we are"},
+  51:{t:"In my family each individual has different ideas about what is right and wrong morally.",a:"Yes",b:"No"},
+  52:{t:"The religious books are very important in our home.",a:"Yes, very important",b:"No, not really"},
+  53:{t:"Money is not handled very carefully in our family.",a:"Yes, it's not",b:"No, it is"},
+  54:{t:"Dishes are usually done immediately after eating.",a:"Yes, immediately",b:"No, rarely"},
+  55:{t:"We often talk about general political and social problems at home.",a:"Yes, often",b:"No, rarely"},
+  56:{t:"We rarely go out to see plays or concerts.",a:"Yes, rarely",b:"No, often"},
+  57:{t:"In our family we are often compared with others as to how well they are doing at work or at school.",a:"True",b:"False"},
+  58:{t:"We normally put a lot of effort and energy into what we do.",a:"Yes",b:"No"},
+  59:{t:"Family members really back up each other in a moment of crisis.",a:"Yes",b:"No"},
+  60:{t:"Family members often criticize each other.",a:"Yes, they do",b:"No, they don't"},
+  61:{t:"In our family, we believe you don't ever get anywhere by raising your voice.",a:"True",b:"False"},
+  62:{t:"In my family it's hard to be by yourself without hurting someone's feelings.",a:"Yes",b:"No"},
+  63:{t:"In our family members are rarely ordered around.",a:"Yes, they are not",b:"No, they are"},
+  64:{t:"We can do whatever we want to in our family.",a:"Yes, we can",b:"No, we can't"},
+  65:{t:"My family members believe that if you sin you will be punished.",a:"True",b:"False"},
+  66:{t:"In our family we are encouraged to be honest than to be practical in life.",a:"Yes",b:"No"},
+  67:{t:"People change their minds very often in our family.",a:"Yes, very often",b:"No, rarely"},
+  68:{t:"Rules are pretty flexible in our household.",a:"Yes, they are flexible",b:"No, they are strict"},
+  69:{t:"We are not really interested in cultural activities.",a:"Yes, we are not",b:"No, we are"},
+  70:{t:"We rarely have intellectual discussions.",a:"Yes, rarely",b:"No, often"},
+  71:{t:"In our family we always try to be best in whatever we do.",a:"Yes",b:"No"},
+  72:{t:"We rarely volunteer when something has to be done at home.",a:"True",b:"False"},
+  73:{t:"My family members hardly ever lose their temper openly.",a:"True",b:"False"},
+  74:{t:"If there's a disagreement in our family, we try hard to smooth things over and maintain peace.",a:"Yes, always",b:"No, never"},
+  75:{t:"Everyone is given equal importance in family decisions.",a:"Yes",b:"No"},
+  76:{t:"At home we feel free to convey our disagreement or disapproval to other family members.",a:"Yes",b:"No"},
+  77:{t:"In our family we don't do things on our own.",a:"True, we don't",b:"False, we do"},
+  78:{t:"There is one family member who makes most of the decisions.",a:"True",b:"False"},
+  79:{t:"Members of my family visit religious places fairly often.",a:"Yes, often",b:"No, rarely"},
+  80:{t:"In my family good manners and respect for law is more important than money.",a:"Yes",b:"No"},
+  81:{t:"There are set ways of doing things at home.",a:"Yes, there are",b:"No, not really"},
+  82:{t:"At home everyone takes care of their own things like clothes, shoes etc.",a:"Yes, they take care",b:"No, they don't"},
+  83:{t:"Watching T.V. or listening to radio is a favourite pass time in our family.",a:"Yes",b:"No"},
+  84:{t:"My family members often go to the library.",a:"Yes, often",b:"No, rarely"},
+  85:{t:"My family members do not give too much importance to money.",a:"True, they don't",b:"False, they do"},
+  86:{t:"Learning about new and different things is very important in our family.",a:"True, it is important",b:"False, it's not"},
+  87:{t:"It's hard to blow off steam at home without upsetting somebody.",a:"Yes, it's hard",b:"No, it's not"},
+  88:{t:"Members of my family get so angry that they throw things at each other.",a:"Yes, often",b:"No, never"},
+  89:{t:"We can talk about anything we want to in our family.",a:"Yes, we can",b:"No, we can't"},
+  90:{t:"If there is difference of opinion in our family, we are given opportunity to explain our point of view.",a:"Yes, always",b:"No, never"},
+  91:{t:"We normally sort out things for ourselves in our family.",a:"True",b:"False"},
+  92:{t:"If we feel like doing something on the spur of the moment we often just pick up and go.",a:"Yes",b:"No"},
+  93:{t:"In our family, topic of religion is talked about with great interest.",a:"Yes",b:"No"},
+  94:{t:"My family members are very strict about lying or cheating.",a:"Yes, they are strict",b:"No, they are not"},
+  95:{t:"All my family members keep their rooms neat and clean.",a:"Yes, they do",b:"No, they don't"},
+  96:{t:"In our family we discuss frequently how to organise our daily chorus.",a:"Yes, frequently",b:"No, rarely"},
+  97:{t:"We like go out and have fun on holidays/weekends.",a:"Yes, we like that",b:"No, we don't"},
+  98:{t:"My family members really like music, art and literature.",a:"Yes, really",b:"No, not at all"}
+};
+
+// ============================================================
+// CONFIRMED STENCIL SCORING KEY — from verified JSON
+// ============================================================
+var KEY = {
+  Cf:[{q:1,a:1,b:0},{q:2,a:1,b:0},{q:15,a:0,b:1},{q:16,a:1,b:0},{q:29,a:1,b:0},{q:30,a:1,b:0},{q:43,a:0,b:1},{q:44,a:1,b:0},{q:57,a:1,b:0},{q:58,a:1,b:0},{q:71,a:1,b:0},{q:72,a:0,b:1},{q:85,a:0,b:1},{q:86,a:1,b:0}],
+  Co:[{q:3,a:1,b:0},{q:4,a:1,b:0},{q:17,a:0,b:1},{q:18,a:1,b:0},{q:31,a:1,b:0},{q:32,a:0,b:1},{q:45,a:1,b:0},{q:46,a:0,b:1},{q:59,a:1,b:0},{q:60,a:0,b:1},{q:73,a:1,b:0},{q:74,a:1,b:0},{q:87,a:0,b:1},{q:88,a:0,b:1}],
+  Ex:[{q:5,a:1,b:0},{q:6,a:0,b:1},{q:19,a:1,b:0},{q:20,a:1,b:0},{q:33,a:1,b:0},{q:34,a:1,b:0},{q:47,a:0,b:1},{q:48,a:1,b:0},{q:61,a:0,b:1},{q:62,a:0,b:1},{q:75,a:1,b:0},{q:76,a:1,b:0},{q:89,a:1,b:0},{q:90,a:1,b:0}],
+  In:[{q:7,a:0,b:1},{q:8,a:1,b:0},{q:21,a:1,b:0},{q:22,a:1,b:0},{q:35,a:0,b:1},{q:36,a:1,b:0},{q:49,a:1,b:0},{q:50,a:0,b:1},{q:63,a:1,b:0},{q:64,a:1,b:0},{q:77,a:0,b:1},{q:78,a:0,b:1},{q:91,a:1,b:0},{q:92,a:1,b:0}],
+  Mo:[{q:9,a:1,b:0},{q:10,a:0,b:1},{q:23,a:1,b:0},{q:24,a:0,b:1},{q:37,a:1,b:0},{q:38,a:1,b:0},{q:51,a:0,b:1},{q:52,a:1,b:0},{q:65,a:1,b:0},{q:66,a:1,b:0},{q:79,a:1,b:0},{q:80,a:1,b:0},{q:93,a:1,b:0},{q:94,a:1,b:0}],
+  Or:[{q:11,a:1,b:0},{q:12,a:1,b:0},{q:25,a:1,b:0},{q:26,a:0,b:1},{q:39,a:1,b:0},{q:40,a:1,b:0},{q:53,a:0,b:1},{q:54,a:1,b:0},{q:67,a:0,b:1},{q:68,a:0,b:1},{q:81,a:1,b:0},{q:82,a:1,b:0},{q:95,a:1,b:0},{q:96,a:1,b:0}],
+  Ro:[{q:13,a:0,b:1},{q:14,a:0,b:1},{q:27,a:1,b:0},{q:28,a:1,b:0},{q:41,a:1,b:0},{q:42,a:0,b:1},{q:55,a:1,b:0},{q:56,a:0,b:1},{q:69,a:0,b:1},{q:70,a:0,b:1},{q:83,a:0,b:1},{q:84,a:1,b:0},{q:97,a:1,b:0},{q:98,a:1,b:0}]
+};
+
+// ============================================================
+// VI SEGMENTS & PAGE BLOCKS
+// ============================================================
+var VI_SEGS = [[[1,71],[15,85]],[[3,73],[17,87]],[[5,75],[19,89]],[[7,77],[21,91]],[[9,79],[23,93]],[[11,81],[25,95]],[[13,83],[27,97]]];
+var PAGES = [[2,1,14],[3,15,28],[4,29,42],[5,43,56],[6,57,70],[7,71,84],[8,85,98]];
+
+// ============================================================
+// NORM TABLES — confirmed JSON (Table 4 Parents, Table 5 Children)
+// ============================================================
+function parseRange(s) {
+  if (!s || s === '-') return [];
+  if (s.indexOf('-') > -1) {
+    var parts = s.split('-');
+    var lo = parseInt(parts[0]);
+    var hi = parseInt(parts[1]);
+    var arr = [];
+    for (var i = lo; i <= hi; i++) arr.push(i);
+    return arr;
+  }
+  return [parseInt(s)];
+}
+
+function buildLookup(rowObj) {
+  var lkp = {};
+  for (var st = 1; st <= 10; st++) {
+    var vals = parseRange(rowObj[String(st)]);
+    for (var j = 0; j < vals.length; j++) {
+      if (!(vals[j] in lkp)) lkp[vals[j]] = st;
+    }
+  }
+  return lkp;
+}
+
+var NORMS_RAW = {
+  children: {
+    label: 'Children 12-20 (Table 5, N=912)',
+    mean_sd: {Cf:{m:'7.75',s:'2.18'},Co:{m:'6.92',s:'2.91'},Ex:{m:'5.98',s:'2.34'},In:{m:'8.49',s:'1.98'},Mo:{m:'5.78',s:'2.98'},Or:{m:'6.86',s:'2.78'},Ro:{m:'7.32',s:'2.80'},Vi:{m:'7.50',s:'1.80'}},
+    rows: {
+      Cf: {"1":"1-3","2":"4","3":"5","4":"6","5":"7","6":"8","7":"9","8":"10","9":"11","10":"12"},
+      Co: {"1":"1","2":"2","3":"3-4","4":"5","5":"6","6":"7-8","7":"9","8":"10","9":"11-12","10":"-"},
+      Ex: {"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9-10","10":"11-12"},
+      In: {"1":"1-4","2":"5","3":"6","4":"7","5":"8","6":"9","7":"10","8":"-","9":"11","10":"12"},
+      Mo: {"1":"-","2":"1","3":"2","4":"3-4","5":"5","6":"6","7":"7-8","8":"9","9":"10-11","10":"12"},
+      Or: {"1":"1","2":"2","3":"3-4","4":"5","5":"6","6":"7","7":"8-9","8":"10","9":"11","10":"12"},
+      Ro: {"1":"1","2":"2-3","3":"4","4":"5","5":"6-7","6":"8","7":"9","8":"10-11","9":"12","10":"-"},
+      Vi: {"1":"1-2","2":"3","3":"4","4":"5-6","5":"7","6":"8","7":"9","8":"10","9":"11","10":"12-14"}
+    }
+  },
+  parents: {
+    label: 'Parents 33-58 (Table 4, N=710)',
+    mean_sd: {Cf:{m:'7.26',s:'2.38'},Co:{m:'7.03',s:'2.89'},Ex:{m:'7.57',s:'2.37'},In:{m:'9.12',s:'1.74'},Mo:{m:'6.91',s:'2.91'},Or:{m:'7.01',s:'2.71'},Ro:{m:'7.64',s:'2.91'},Vi:{m:'7.50',s:'1.80'}},
+    rows: {
+      Cf: {"1":"1-2","2":"3","3":"4-5","4":"6","5":"7","6":"8","7":"9","8":"10","9":"11","10":"12"},
+      Co: {"1":"1","2":"2","3":"3-4","4":"5","5":"6","6":"7-8","7":"9","8":"10","9":"11-12","10":"-"},
+      Ex: {"1":"1-3","2":"4","3":"5","4":"6","5":"7","6":"8","7":"9","8":"10","9":"11","10":"12"},
+      In: {"1":"1-5","2":"6","3":"7","4":"8","5":"-","6":"9","7":"10","8":"11","9":"12","10":"-"},
+      Mo: {"1":"1","2":"2","3":"3","4":"4-5","5":"6","6":"7-8","7":"9","8":"10","9":"11-12","10":"-"},
+      Or: {"1":"1","2":"2-3","3":"4","4":"5","5":"6","6":"7-8","7":"9","8":"10","9":"11","10":"12"},
+      Ro: {"1":"1-2","2":"3","3":"4","4":"5-6","5":"7","6":"8","7":"9-10","8":"11","9":"12","10":"-"},
+      Vi: {"1":"1-2","2":"3","3":"4","4":"5-6","5":"7","6":"8","7":"9","8":"10","9":"11","10":"12-14"}
+    }
+  }
+};
+
+// Build fast lookup tables once
+var LOOKUP = {};
+var grpKeys = ['children','parents'];
+for (var gi = 0; gi < grpKeys.length; gi++) {
+  var grp = grpKeys[gi];
+  LOOKUP[grp] = {};
+  var dims = Object.keys(NORMS_RAW[grp].rows);
+  for (var di = 0; di < dims.length; di++) {
+    var dim = dims[di];
+    LOOKUP[grp][dim] = buildLookup(NORMS_RAW[grp].rows[dim]);
+  }
+}
+
+// ============================================================
+// STATE — persisted in localStorage
+// ============================================================
+var R    = JSON.parse(localStorage.getItem('fes_r')    || '{}');
+var AG   = localStorage.getItem('fes_ag')              || '';
+var INFO = JSON.parse(localStorage.getItem('fes_info') || '{}');
+
+function save() {
+  localStorage.setItem('fes_r',    JSON.stringify(R));
+  localStorage.setItem('fes_ag',   AG);
+  localStorage.setItem('fes_info', JSON.stringify(INFO));
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function qSub(q) {
+  var subs = Object.keys(KEY);
+  for (var i = 0; i < subs.length; i++) {
+    var items = KEY[subs[i]];
+    for (var j = 0; j < items.length; j++) {
+      if (items[j].q === q) return subs[i];
+    }
+  }
+  return '';
+}
+
+function getSten(grp, dim, raw) {
+  if (!grp || !LOOKUP[grp] || !LOOKUP[grp][dim]) return null;
+  var v = LOOKUP[grp][dim][raw];
+  return (v !== undefined) ? v : null;
+}
+
+function nullOrDash(v) {
+  return (v !== null && v !== undefined) ? String(v) : '&#8212;';
+}
+
+function getLvl(s) {
+  if (s === null || s === undefined) return {l:'Not mapped', cls:'lb-null', bg:'#f1f5f9', col:'#64748b'};
+  if (s <= 3) return {l:'Low',     cls:'lb-low',  bg:'#fee2e2', col:'#b91c1c'};
+  if (s <= 7) return {l:'Average', cls:'lb-avg',  bg:'#dcfce7', col:'#047857'};
+  return           {l:'High',    cls:'lb-high', bg:'#ede9fe', col:'#7c3aed'};
+}
+
+// VI interpretation — exact from Indian Manual Table-2 Interpretation of Vi Score
+// STEN 10     = No Distortion: little or no distortion, responses quite consistent
+// STEN 5–9   = Low Distortion: scores fairly accurate, retesting not required
+// STEN 1–4   = High Distortion: scores not reliable, retesting desirable
+function getViInterp(s) {
+  if (s === null || s === undefined) return {txt:'Not mapped &mdash; norm table entry absent', cls:'lb-null'};
+  if (s === 10)              return {txt:'No Distortion &mdash; There is little or no distortion. Responses are quite consistent.', cls:'lb-high'};
+  if (s >= 5 && s <= 9)     return {txt:'Low Distortion &mdash; Scores are fairly accurate and retesting is not required.', cls:'lb-avg'};
+  if (s >= 1 && s <= 4)     return {txt:'High Distortion &mdash; Scores are not reliable. It is desirable for the individual to take the test again after some time.', cls:'lb-low'};
+  return {txt:'Not mapped', cls:'lb-null'};
+}
+
+function calc() {
+  var det = {};
+  var allDone = true;
+  for (var q = 1; q <= 98; q++) { if (!R[q]) allDone = false; }
+
+  var subNames = Object.keys(KEY);
+  for (var si = 0; si < subNames.length; si++) {
+    var s = subNames[si];
+    var items = KEY[s];
+    var raw = 0;
+    var rows = [];
+    for (var ii = 0; ii < items.length; ii++) {
+      var it = items[ii];
+      var a = R[it.q];
+      var v = a ? it[a] : null;
+      if (v === 1) raw++;
+      rows.push({q:it.q, a:it.a, b:it.b, ans:a||'', val:v});
+    }
+    det[s] = {raw:raw, sten:getSten(AG,s,raw), rows:rows};
+  }
+
+  var viRaw = 0;
+  var segs = [];
+  for (var vi = 0; vi < VI_SEGS.length; vi++) {
+    var pairs = VI_SEGS[vi];
+    var sc = 0;
+    var pi = [];
+    for (var pi2 = 0; pi2 < pairs.length; pi2++) {
+      var q1 = pairs[pi2][0];
+      var q2 = pairs[pi2][1];
+      var r1 = R[q1]; var r2 = R[q2];
+      var m = (r1 && r2 && r1 === r2) ? 1 : 0;
+      sc += m;
+      pi.push({q1:q1, q2:q2, r1:r1||'', r2:r2||'', m:m});
+    }
+    viRaw += sc;
+    segs.push({s:vi+1, sc:sc, pi:pi});
+  }
+  return {allDone:allDone, det:det, vi:{raw:viRaw, sten:getSten(AG,'Vi',viRaw), segs:segs}};
+}
+
+// ============================================================
+// TAB ROUTING
+// ============================================================
+function go(tab) {
+  var panels = document.querySelectorAll('.panel');
+  for (var i = 0; i < panels.length; i++) panels[i].hidden = (panels[i].id !== tab);
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList[tabs[i].getAttribute('data-tab') === tab ? 'add' : 'remove']('active');
+  }
+  var fns = {resp:rRESP, assess:rASSESS, results:rRESULTS, matrix:rMATRIX, vi:rVI, norms:rNORMS};
+  if (fns[tab]) fns[tab]();
+}
+
+var tabs = document.querySelectorAll('.tab');
+for (var ti = 0; ti < tabs.length; ti++) {
+  (function(btn){ btn.onclick = function(){ go(btn.getAttribute('data-tab')); }; })(tabs[ti]);
+}
+
+// ============================================================
+// RESPONDENT PAGE
+// ============================================================
+function rRESP() {
+  var i = INFO;
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('resp').innerHTML =
+    '<div class="card" style="max-width:540px;margin:0 auto">' +
+    '<h2>Respondent Details</h2>' +
+    '<p class="sub" style="margin-bottom:14px">Complete before starting. Age auto-selects the correct norm table.</p>' +
+    '<div class="two-col">' +
+    '<div class="fg" style="grid-column:1/-1"><label>Full Name *</label><input type="text" id="fn" value="'+(i.name||'')+'" placeholder="Respondent full name"></div>' +
+    '<div class="fg"><label>Age *</label><input type="number" id="fa" value="'+(i.age||'')+'" min="1" max="100" placeholder="e.g. 16" oninput="ageHint()"></div>' +
+    '<div class="fg"><label>Date *</label><input type="date" id="fd" value="'+(i.date||today)+'"></div>' +
+    '<div class="fg" style="grid-column:1/-1"><label>Age Group / Norm Table *</label>' +
+    '<select id="fag"><option value="">-- Select --</option>' +
+    '<option value="children"'+(AG==='children'?' selected':'')+'>Children (12-20 years) -- Table 5</option>' +
+    '<option value="parents"'+(AG==='parents'?' selected':'')+'>Parents (33-58 years) -- Table 4</option>' +
+    '</select><div id="ahint" style="font-size:12px;margin-top:3px"></div></div>' +
+    '<div class="fg" style="grid-column:1/-1"><label>Notes (optional)</label><input type="text" id="fnotes" value="'+(i.notes||'')+'" placeholder="Any context..."></div>' +
+    '</div>' +
+    '<div id="rerr" class="note note-err" style="display:none;margin-top:10px"></div>' +
+    '<div class="row" style="margin-top:14px">' +
+    '<button class="btn btn-primary" onclick="saveResp()">Save &amp; Go to Assessment &rarr;</button>' +
+    '</div></div>';
+  ageHint();
+}
+
+function ageHint() {
+  var el = document.getElementById('fa');
+  if (!el) return;
+  var age = parseInt(el.value || '');
+  var h = document.getElementById('ahint');
+  var sel = document.getElementById('fag');
+  if (!h || !sel) return;
+  if (age >= 12 && age <= 20) {
+    h.style.color = '#047857'; h.textContent = 'Children range -- Table 5 will be used'; sel.value = 'children';
+  } else if (age >= 33 && age <= 58) {
+    h.style.color = '#047857'; h.textContent = 'Parents range -- Table 4 will be used'; sel.value = 'parents';
+  } else if (age > 0) {
+    h.style.color = '#b45309'; h.textContent = 'Outside norm ranges (12-20 or 33-58). Select manually.';
+  } else {
+    h.textContent = '';
+  }
+}
+
+function saveResp() {
+  var nm = document.getElementById('fn').value.trim();
+  var ag = document.getElementById('fa').value;
+  var dt = document.getElementById('fd').value;
+  var gr = document.getElementById('fag').value;
+  var nt = document.getElementById('fnotes').value.trim();
+  var e  = document.getElementById('rerr');
+  if (!nm || !ag || !dt || !gr) {
+    e.style.display = ''; e.textContent = 'Please complete all required fields: Name, Age, Date, Age Group.'; return;
+  }
+  e.style.display = 'none';
+  INFO = {name:nm, age:parseInt(ag), date:dt, notes:nt};
+  AG = gr;
+  save();
+  go('assess');
+}
+
+// ============================================================
+// ASSESSMENT PAGE
+// ============================================================
+function rASSESS() {
+  var done = 0;
+  var rkeys = Object.keys(R);
+  for (var i = 0; i < rkeys.length; i++) { if (R[rkeys[i]]) done++; }
+  var pct = Math.round(done / 98 * 100);
+  var label = AG ? NORMS_RAW[AG].label : 'No norm table selected';
+
+  var html = '<div class="card">' +
+    '<div class="row-sb"><div>' +
+    '<h2 style="margin:0">Assessment</h2>';
+  if (INFO.name) {
+    html += '<p class="sub" style="margin:3px 0">' + INFO.name + ' &middot; Age ' + INFO.age + ' &middot; ' + INFO.date + ' &middot; <b>' + label + '</b></p>';
+  } else {
+    html += '<p class="sub" style="color:var(--red)">Please fill Respondent details first</p>';
+  }
+  html += '</div><div class="row noprint">' +
+    '<button class="btn btn-danger" onclick="resetAll()">Reset All</button>' +
+    '<button class="btn btn-primary" onclick="go(\'results\')">View Results &rarr;</button>' +
+    '</div></div>' +
+    '<div class="progress"><div class="bar" id="pbar" style="width:'+pct+'%"></div></div>' +
+    '<p class="sub" id="pcnt"><b>'+done+'/98</b> answered &middot; '+pct+'%</p></div>';
+
+  for (var pi = 0; pi < PAGES.length; pi++) {
+    var pg = PAGES[pi][0]; var qs = PAGES[pi][1]; var qe = PAGES[pi][2];
+    html += '<div class="qblock">Page ' + pg + ' &mdash; Q' + qs + '&ndash;Q' + qe + '</div><div class="qgrid">';
+    for (var q = qs; q <= qe; q++) {
+      var sub = qSub(q);
+      var sel = R[q] || '';
+      var qd  = Q[q];
+      html += '<div class="q ' + (sel ? 'done' : '') + '" id="qi' + q + '">' +
+        '<div class="qtop"><span class="qn">Q' + q + '</span><span class="qs">' + sub + '</span></div>' +
+        '<div class="qt">' + qd.t + '</div>' +
+        '<div class="opts">' +
+        '<button class="opt ' + (sel==='a'?'sel':'') + '" onclick="ans(' + q + ',\'a\')"><b style="color:' + (sel==='a'?'#fff':'#1d4ed8') + '">a)</b> ' + qd.a + '</button>' +
+        '<button class="opt ' + (sel==='b'?'sel':'') + '" onclick="ans(' + q + ',\'b\')"><b style="color:' + (sel==='b'?'#fff':'#1d4ed8') + '">b)</b> ' + qd.b + '</button>' +
+        '</div></div>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('assess').innerHTML = html;
+}
+
+function ans(q, a) {
+  R[q] = a; save();
+  var el = document.getElementById('qi' + q);
+  if (el) {
+    el.className = 'q done';
+    var opts = el.querySelectorAll('.opt');
+    for (var i = 0; i < opts.length; i++) {
+      var isSel = (i === (a === 'a' ? 0 : 1));
+      if (isSel) { opts[i].classList.add('sel'); opts[i].querySelector('b').style.color = '#fff'; }
+      else       { opts[i].classList.remove('sel'); opts[i].querySelector('b').style.color = '#1d4ed8'; }
+    }
+  }
+  var n = 0; var rk = Object.keys(R); for (var i=0;i<rk.length;i++) { if(R[rk[i]]) n++; }
+  var pb = document.getElementById('pbar'); if (pb) pb.style.width = Math.round(n/98*100) + '%';
+  var pc = document.getElementById('pcnt'); if (pc) pc.innerHTML = '<b>'+n+'/98</b> answered &middot; '+Math.round(n/98*100)+'%';
+}
+
+function resetAll() {
+  if (confirm('Clear all responses and start over?')) { R = {}; save(); rASSESS(); }
+}
+
+// ============================================================
+// RESULTS PAGE
+// ============================================================
+function rRESULTS() {
+  var r = calc();
+  var warns = '';
+  if (!AG) warns += '<div class="note note-err">No age group selected. Go to Respondent tab first.</div>';
+  if (!r.allDone) {
+    var ms = []; for (var q=1;q<=98;q++) { if (!R[q]) ms.push(q); }
+    warns += '<div class="note note-warn">' + ms.length + ' unanswered: Q' + ms.slice(0,12).join(', Q') + (ms.length>12?' (+more)':'') + '</div>';
+  }
+
+  var normLabel = AG ? NORMS_RAW[AG].label : 'Not selected';
+  var html = warns +
+    '<div class="card"><div class="row-sb"><div>' +
+    '<h2 style="margin:0">Results</h2>';
+  if (INFO.name) html += '<p class="sub">' + INFO.name + ' &middot; Age ' + INFO.age + ' &middot; ' + INFO.date + '</p>';
+  html += '<p class="sub">Norm table: <b>' + normLabel + '</b></p></div>' +
+    '<div class="row noprint">' +
+    '<button class="btn btn-secondary" onclick="window.print()">Print</button>' +
+    '<button class="btn btn-success" onclick="dlPDF()">Download PDF</button>' +
+    '</div></div>' +
+    '<div style="overflow-x:auto;margin-top:10px"><table>' +
+    '<thead><tr><th>Dimension</th><th>Raw Score</th><th>STEN</th><th>Level</th></tr></thead><tbody>';
+
+  var subNames = Object.keys(r.det);
+  for (var si = 0; si < subNames.length; si++) {
+    var s = subNames[si];
+    var d = r.det[s];
+    var lv = getLvl(d.sten);
+    html += '<tr>' +
+      '<td><b>' + s + '</b> &mdash; ' + SUBS[s] + '</td>' +
+      '<td><span class="sc">' + d.raw + '</span><span class="sub"> /14</span></td>' +
+      '<td><span class="sc" style="color:'+lv.col+'">' + nullOrDash(d.sten) + '</span></td>' +
+      '<td><span class="lbadge '+lv.cls+'">' + lv.l + '</span></td>' +
+      '</tr>';
+  }
+
+  var vi = r.vi;
+  var vil = getLvl(vi.sten);
+  var vii = getViInterp(vi.sten);
+  html += '<tr style="border-top:2px solid var(--line)">' +
+    '<td><b>Vi</b> &mdash; Validity Index</td>' +
+    '<td><span class="sc">' + vi.raw + '</span><span class="sub"> /14</span></td>' +
+    '<td><span class="sc" style="color:'+vil.col+'">' + nullOrDash(vi.sten) + '</span></td>' +
+    '<td><span class="lbadge ' + vii.cls + '">' + vii.txt + '</span></td>' +
+    '</tr></tbody></table></div></div>';
+
+  // Detailed stencil breakdown
+  html += '<div class="card"><h3>Stencil Calculation Detail</h3>' +
+    '<p class="sub">Each selected option contributes its printed value (0 or 1). Only 1s add to raw score.</p>';
+
+  for (var si = 0; si < subNames.length; si++) {
+    var s = subNames[si];
+    var d = r.det[s];
+    var lv = getLvl(d.sten);
+    html += '<h4 style="margin:14px 0 5px">' + s + ' &mdash; ' + SUBS[s] +
+      ' &nbsp; Raw: <b>' + d.raw + '</b>/14' +
+      ' &nbsp; STEN: <b style="color:'+lv.col+'">' + nullOrDash(d.sten) + '</b></h4>' +
+      '<div style="overflow-x:auto"><table>' +
+      '<thead><tr><th>Q#</th><th>Question</th><th>Key a</th><th>Key b</th><th>Selected</th><th>Contributed</th></tr></thead><tbody>';
+    for (var ri = 0; ri < d.rows.length; ri++) {
+      var x = d.rows[ri];
+      var contrib = x.val === null ? '&mdash;' : String(x.val);
+      var contribCol = x.val === 1 ? 'var(--green)' : x.val === 0 ? 'var(--muted)' : '#f87171';
+      html += '<tr>' +
+        '<td>' + x.q + '</td>' +
+        '<td style="font-size:12px;max-width:260px">' + Q[x.q].t + '</td>' +
+        '<td style="color:' + (x.a===1?'var(--green)':'var(--muted)') + '"><b>' + x.a + '</b></td>' +
+        '<td style="color:' + (x.b===1?'var(--green)':'var(--muted)') + '"><b>' + x.b + '</b></td>' +
+        '<td><b>' + (x.ans||'&mdash;') + '</b></td>' +
+        '<td style="font-weight:700;color:'+contribCol+'">' + contrib + '</td>' +
+        '</tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  html += '</div>';
+  document.getElementById('results').innerHTML = html;
+}
+
+// ============================================================
+// MATRIX & KEYS PAGE
+// ============================================================
+function rMATRIX() {
+  var html = '<div class="card"><h2>Subscale Matrix &amp; Stencil Keys</h2>' +
+    '<p class="sub">Confirmed Indian Manual stencil overlay. Green = contributes 1 to raw score.</p></div>';
+  var subNames = Object.keys(KEY);
+  for (var si = 0; si < subNames.length; si++) {
+    var s = subNames[si];
+    var items = KEY[s];
+    html += '<div class="card"><h3>' + s + ' &mdash; ' + SUBS[s] + '</h3>' +
+      '<div style="overflow-x:auto"><table>' +
+      '<thead><tr><th>Q#</th><th>Question</th><th>a value</th><th>b value</th></tr></thead><tbody>';
+    for (var ii = 0; ii < items.length; ii++) {
+      var it = items[ii];
+      html += '<tr>' +
+        '<td>' + it.q + '</td>' +
+        '<td style="font-size:12px">' + Q[it.q].t + '</td>' +
+        '<td style="font-weight:700;color:' + (it.a===1?'var(--green)':'var(--muted)') + '">' + it.a + '</td>' +
+        '<td style="font-weight:700;color:' + (it.b===1?'var(--green)':'var(--muted)') + '">' + it.b + '</td>' +
+        '</tr>';
+    }
+    html += '</tbody></table></div></div>';
+  }
+  document.getElementById('matrix').innerHTML = html;
+}
+
+// ============================================================
+// VI ENGINE PAGE
+// ============================================================
+function rVI() {
+  var r = calc();
+  var vil = getLvl(r.vi.sten);
+  var vii = getViInterp(r.vi.sten);
+  var html = '<div class="card"><h2>Validity Index (VI)</h2>' +
+    '<p class="sub">Same answer in a pair = 1 &middot; Different = 0 &middot; 7 segments x 2 pairs = 14 total &middot; Range 0-14</p>' +
+    '<div class="row" style="gap:20px;margin-top:12px;flex-wrap:wrap">' +
+    '<div><p class="sub" style="margin:0">VI Raw</p><span class="sc">' + r.vi.raw + '</span><span class="sub">/14</span></div>' +
+    '<div><p class="sub" style="margin:0">VI STEN</p><span class="sc" style="color:'+vil.col+'">' + nullOrDash(r.vi.sten) + '</span></div>' +
+    '<div><span class="lbadge '+vii.cls+'" style="font-size:13px;padding:7px 14px">' + vii.txt + '</span></div>' +
+    '</div></div>';
+
+  for (var i = 0; i < r.vi.segs.length; i++) {
+    var seg = r.vi.segs[i];
+    html += '<div class="card"><h3>Segment ' + seg.s + ' &mdash; Score: ' + seg.sc + '/2</h3>' +
+      '<table><thead><tr><th>Pair</th><th>Q1 text</th><th>Ans 1</th><th>Q2 text</th><th>Ans 2</th><th>Match</th></tr></thead><tbody>';
+    for (var j = 0; j < seg.pi.length; j++) {
+      var p = seg.pi[j];
+      html += '<tr>' +
+        '<td>Q'+p.q1+'&harr;Q'+p.q2+'</td>' +
+        '<td style="font-size:11px;max-width:160px">' + Q[p.q1].t.substring(0,55) + '...</td>' +
+        '<td><b>' + (p.r1||'&mdash;') + '</b></td>' +
+        '<td style="font-size:11px;max-width:160px">' + Q[p.q2].t.substring(0,55) + '...</td>' +
+        '<td><b>' + (p.r2||'&mdash;') + '</b></td>' +
+        '<td style="font-weight:700;color:' + (p.m?'var(--green)':'var(--red)') + '">' + p.m + '</td>' +
+        '</tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  document.getElementById('vi').innerHTML = html;
+}
+
+// ============================================================
+// STEN NORMS PAGE
+// ============================================================
+function rNORMS() {
+  var html = '<div class="card"><h2>STEN Norm Tables</h2>' +
+    '<p class="sub">Exact values from confirmed JSON &mdash; Indian Manual Table 4 (Parents) &amp; Table 5 (Children).</p>' +
+    '<div class="note note-info">Raw scores showing <b>&mdash;</b> have no STEN mapping in the manual. App returns null &mdash; nothing is assumed.</div></div>';
+
+  var grps = ['children','parents'];
+  for (var gi = 0; gi < grps.length; gi++) {
+    var grp = grps[gi];
+    var t = NORMS_RAW[grp];
+    html += '<div class="card"><h3>' + t.label + '</h3><div style="overflow-x:auto"><table><thead><tr><th>Dimension</th>';
+    for (var s = 1; s <= 10; s++) html += '<th style="text-align:center">STEN ' + s + '</th>';
+    html += '<th style="text-align:center">Mean</th><th style="text-align:center">SD</th></tr></thead><tbody>';
+    var dims = Object.keys(t.rows);
+    for (var di = 0; di < dims.length; di++) {
+      var dim = dims[di];
+      var row = t.rows[dim];
+      var ms  = t.mean_sd[dim];
+      var dimLabel = dim !== 'Vi' ? dim + ' &mdash; ' + SUBS[dim] : dim + ' &mdash; Validity Index';
+      html += '<tr><td><b>' + dimLabel + '</b></td>';
+      for (var s = 1; s <= 10; s++) {
+        var v = row[String(s)];
+        html += '<td style="text-align:center;font-weight:600">' + ((!v || v==='-') ? '&mdash;' : v) + '</td>';
+      }
+      html += '<td style="text-align:center">' + ms.m + '</td><td style="text-align:center">' + ms.s + '</td></tr>';
+    }
+    html += '</tbody></table></div></div>';
+  }
+  document.getElementById('norms').innerHTML = html;
+}
+
+// ============================================================
+// PDF DOWNLOAD
+// ============================================================
+function dlPDF() {
+  var r = calc();
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF();
+  var y = 15;
+  doc.setFontSize(15); doc.setFont('helvetica','bold');
+  doc.text('Indian Manual Matrix-Based FES Report', 105, y, {align:'center'}); y += 8;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  if (INFO.name) { doc.text('Name: '+INFO.name+'   Age: '+INFO.age+'   Date: '+INFO.date, 14, y); y += 6; }
+  doc.text('Norm table: '+(AG ? NORMS_RAW[AG].label : 'Not selected'), 14, y); y += 9;
+  doc.setFont('helvetica','bold');
+  doc.text('Dimension', 14, y); doc.text('Raw', 90, y); doc.text('STEN', 115, y); doc.text('Level', 140, y); y += 4;
+  doc.setFont('helvetica','normal'); doc.line(14, y, 196, y); y += 5;
+  var subNames = Object.keys(r.det);
+  for (var si = 0; si < subNames.length; si++) {
+    var s = subNames[si]; var d = r.det[s]; var lv = getLvl(d.sten);
+    doc.text(s+' -- '+SUBS[s], 14, y);
+    doc.text(d.raw+'/14', 90, y);
+    doc.text(d.sten !== null && d.sten !== undefined ? String(d.sten) : '--', 115, y);
+    doc.text(lv.l, 140, y); y += 6;
+  }
+  doc.line(14, y, 196, y); y += 5;
+  var vii = getViInterp(r.vi.sten);
+  doc.setFont('helvetica','bold');
+  doc.text('Vi -- Validity Index', 14, y);
+  doc.text(r.vi.raw+'/14', 90, y);
+  doc.text(r.vi.sten !== null && r.vi.sten !== undefined ? String(r.vi.sten) : '--', 115, y); y += 6;
+  doc.setFont('helvetica','normal');
+  var viTxt = r.vi.sten === null ? 'Not mapped' : r.vi.sten === 10 ? 'No Distortion - Responses quite consistent' : r.vi.sten >= 5 ? 'Low Distortion - Scores fairly accurate, retesting not required' : 'High Distortion - Scores not reliable, retesting desirable';
+  doc.text(viTxt, 14, y, {maxWidth:180}); y += 10;
+  doc.setFontSize(8);
+  doc.text('Scores based on confirmed Indian Manual stencil keys and norm tables. Raw scores not in table shown as -- (not assumed).', 14, y, {maxWidth:180}); y += 5;
+  doc.text('This report must be interpreted by a qualified professional.', 14, y);
+  var fname = 'FES_' + (INFO.name || 'Report') + '_' + (INFO.date || new Date().toISOString().split('T')[0]) + '.pdf';
+  doc.save(fname);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+rRESP();
+</script>
+</body>
+</html>
